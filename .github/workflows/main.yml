@@ -1,0 +1,35 @@
+name: Tailscale - Qemu
+
+on: 
+  workflow_dispatch:
+    inputs:
+      link_iso:
+        description: 'dán link iso của ae vô đây'
+        required: true
+ 
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: kiểm tra
+        uses: actions/checkout@v4
+      - name: chuẩn bị phần mềm
+        run: |
+          echo " đang update... "
+          sudo apt update -y &>/dev/null
+          echo đang tải phần mềm
+          sudo apt install wget curl qemu-system -y &>/dev/null
+          echo tailscale...
+          curl -fsSL https://tailscale.com/install.sh | sh
+          sudo tailscale up
+      - name: run
+        run: |
+          echo tải os
+          sudo wget -O /isos/a.iso "${{ github.event.inputs.link_iso }}" &>/dev/null &
+          echo start
+          printf " ip: "
+          tailscale ip -4
+          echo port mở ở port 5900 (VNC)
+          chmod +x qemu
+          ./qemu
+        
